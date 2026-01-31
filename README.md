@@ -95,8 +95,3 @@ Uso académico - Curso Platzi
 
 ---
 
-<div align="center">
-
-Desarrollado con 🤖 durante el curso de automatización de Platzi
-
-</div>

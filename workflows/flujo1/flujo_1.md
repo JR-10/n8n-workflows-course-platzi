@@ -3,6 +3,7 @@
 > **Workflow ID:** `flujo_1_platzi`  
 > **Versión:** 1.0.0  
 > **Última actualización:** 2026-01-31  
+> **Autor:** Curso n8n - Platzi
 
 ---
 
@@ -10,12 +11,14 @@
 
 1. [Resumen Ejecutivo](#resumen-ejecutivo)
 2. [Arquitectura del Workflow](#arquitectura-del-workflow)
-3. [Requisitos Previos](#requisitos-previos)
-4. [Configuración del Entorno](#configuración-del-entorno)
-5. [Configuración de Credenciales OAuth2](#configuración-de-credenciales-oauth2)
-6. [Despliegue y Ejecución](#despliegue-y-ejecución)
-7. [Gestión de Código y Versionamiento](#gestión-de-código-y-versionamiento)
-8. [Troubleshooting](#troubleshooting)
+3. [Historial de Versiones](#historial-de-versiones)
+4. [Requisitos Previos](#requisitos-previos)
+5. [Configuración del Entorno](#configuración-del-entorno)
+6. [Configuración de Credenciales OAuth2](#configuración-de-credenciales-oauth2)
+7. [Despliegue y Ejecución](#despliegue-y-ejecución)
+8. [Gestión de Código y Versionamiento](#gestión-de-código-y-versionamiento)
+9. [Troubleshooting](#troubleshooting)
+10. [Referencias](#referencias)
 
 ---
 
@@ -25,9 +28,11 @@ Este workflow implementa un sistema automatizado de captura y enrutamiento de le
 
 ### Caso de Uso
 
-- **Entrada:** Formulario web con campos Nombre, Email y Mensaje
-- **Procesamiento:** Filtrado de emails internos (`@platzi.com`) y clasificación por contenido
-- **Salida:** Notificación a Slack (canal `#sellers`) o respuesta automática por Gmail
+| Aspecto | Descripción |
+|---------|-------------|
+| **Entrada** | Formulario web con campos Nombre, Email y Mensaje |
+| **Procesamiento** | Filtrado de emails internos (`@platzi.com`) y clasificación por contenido |
+| **Salida** | Notificación a Slack (canal `#sellers`) o respuesta automática por Gmail |
 
 ### Stack Tecnológico
 
@@ -41,6 +46,16 @@ Este workflow implementa un sistema automatizado de captura y enrutamiento de le
 ---
 
 ## Arquitectura del Workflow
+
+### Diagrama Visual
+
+<p align="center">
+  <img src="./assets/flujo_1_v1.png" alt="Workflow v1" width="800"/>
+</p>
+
+<p align="center"><em>Figura 1: Arquitectura del workflow - Versión 1</em></p>
+
+### Diagrama de Flujo (ASCII)
 
 ```
 ┌─────────────────────┐
@@ -88,20 +103,39 @@ Este workflow implementa un sistema automatizado de captura y enrutamiento de le
 
 ---
 
+## Historial de Versiones
+
+| Versión | Fecha | Cambios | Estado |
+|---------|-------|---------|--------|
+| 1.0.0 | 2026-01-31 | Release inicial con captura de leads y enrutamiento básico | ✅ Actual |
+| 1.1.0 | *Próximamente* | Integración con CRM y validación avanzada | 🔄 Planificado |
+
+### Capturas por Versión
+
+| Versión | Diagrama |
+|---------|----------|
+| v1.0.0 | [Ver diagrama](./assets/flujo_1_v1.0.0.png) |
+
+> 📁 **Nota:** Los diagramas de cada versión se almacenan en [`./assets/`](./assets/) para mantener trazabilidad visual del workflow.
+
+---
+
 ## Requisitos Previos
 
 ### Software
 
-- **Windows 10/11** con WSL 2 habilitado
-- **Docker Desktop** ≥ 4.0 con integración WSL 2
-- **Docker Compose** ≥ 2.0
-- **ngrok** cuenta gratuita o de pago
+| Requisito | Versión Mínima | Verificación |
+|-----------|----------------|--------------|
+| Windows | 10/11 con WSL 2 | `wsl --version` |
+| Docker Desktop | ≥ 4.0 | `docker --version` |
+| Docker Compose | ≥ 2.0 | `docker compose version` |
+| ngrok | Cuenta activa | `ngrok --version` |
 
-### Accesos
+### Accesos Requeridos
 
-- Cuenta de Google con permisos para crear OAuth Apps
-- Workspace de Slack con permisos de administrador
-- Repositorio Git configurado (opcional)
+- [ ] Cuenta de Google con permisos para crear OAuth Apps
+- [ ] Workspace de Slack con permisos de administrador
+- [ ] Repositorio Git configurado (opcional)
 
 ---
 
@@ -137,7 +171,7 @@ cd n8n-workflows-course-platzi
 Crear archivo `.env`:
 
 ```bash
-# .env
+# filepath: .env
 # Dominio ngrok (sin protocolo ni trailing slash)
 N8N_HOST=tu-subdominio.ngrok-free.app
 ```
@@ -147,20 +181,22 @@ N8N_HOST=tu-subdominio.ngrok-free.app
 Crear `docker-compose.yml`:
 
 ```yaml
+# filepath: docker-compose.yml
 version: "3.8"
 
 services:
   n8n:
-    image: docker.n8n.io/n8nio/n8n
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
     ports:
       - "5678:5678"
     environment:
       - N8N_HOST=${N8N_HOST}
-      - WEBHOOK_URL=https://${N8N_HOST}
-      - N8N_EDITOR_BASE_URL=https://${N8N_HOST}
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://${N8N_HOST}/
     volumes:
       - n8n_data:/home/node/.n8n
-    restart: unless-stopped
 
 volumes:
   n8n_data:
@@ -172,6 +208,16 @@ volumes:
 docker compose up -d
 ```
 
+### 7. Verificar Estado
+
+```bash
+# Verificar contenedor
+docker ps | grep n8n
+
+# Ver logs
+docker logs n8n --tail 50
+```
+
 **Acceso:** `https://<TU_NGROK_DOMAIN>`
 
 ---
@@ -180,41 +226,86 @@ docker compose up -d
 
 ### Slack API
 
-1. Acceder a [Slack API](https://api.slack.com/apps) → **Create New App**
-2. Navegar a **OAuth & Permissions**
-3. Configurar **Redirect URL:**
-   ```
-   https://<TU_NGROK>/rest/oauth2-credential/callback
-   ```
-4. Agregar **Scopes:**
-   - `chat:write`
-   - `chat:write.customize`
-5. **Install to Workspace** y copiar el `Bot User OAuth Token`
+#### Paso 1: Crear Aplicación
+
+1. Acceder a [Slack API](https://api.slack.com/apps)
+2. Click en **Create New App** → **From scratch**
+3. Nombrar la aplicación y seleccionar workspace
+
+#### Paso 2: Configurar OAuth
+
+1. Navegar a **OAuth & Permissions**
+2. Configurar **Redirect URL:**
+
+```
+https://<TU_NGROK_DOMAIN>/rest/oauth2-credential/callback
+```
+
+#### Paso 3: Agregar Scopes
+
+| Scope | Descripción |
+|-------|-------------|
+| `chat:write` | Enviar mensajes como bot |
+| `chat:write.customize` | Personalizar nombre/icono del mensaje |
+
+#### Paso 4: Instalar
+
+1. Click en **Install to Workspace**
+2. Autorizar permisos
+3. Copiar `Bot User OAuth Token`
+
+---
 
 ### Google Cloud Platform (Gmail API)
 
+#### Paso 1: Crear Proyecto
+
 1. Acceder a [Google Cloud Console](https://console.cloud.google.com/)
-2. Crear proyecto o seleccionar existente
-3. Habilitar **Gmail API** desde Library
-4. Configurar **OAuth Consent Screen:**
-   - User Type: `External`
-   - Test Users: Agregar email autorizado
-5. Crear **Credentials → OAuth Client ID** (Web Application)
-6. Configurar **Authorized redirect URI:**
-   ```
-   https://<TU_NGROK>/rest/oauth2-credential/callback
-   ```
-7. Copiar `Client ID` y `Client Secret`
+2. Crear proyecto nuevo o seleccionar existente
+
+#### Paso 2: Habilitar API
+
+1. Ir a **APIs & Services** → **Library**
+2. Buscar **Gmail API**
+3. Click en **Enable**
+
+#### Paso 3: Configurar Consent Screen
+
+| Campo | Valor |
+|-------|-------|
+| User Type | External |
+| App Name | n8n Workflow |
+| Support Email | Tu email |
+| Test Users | Emails autorizados |
+
+#### Paso 4: Crear Credenciales
+
+1. **APIs & Services** → **Credentials**
+2. **Create Credentials** → **OAuth Client ID**
+3. Application type: **Web Application**
+4. Authorized redirect URI:
+
+```
+https://<TU_NGROK_DOMAIN>/rest/oauth2-credential/callback
+```
+
+5. Copiar `Client ID` y `Client Secret`
+
+---
 
 ### Vinculación en n8n
 
-1. Acceder a **Credentials → Add Credential**
-2. Configurar **Slack OAuth2 API:**
-   - Ingresar Bot Token
-   - Autorizar con cuenta de Slack
-3. Configurar **Gmail OAuth2 API:**
-   - Ingresar Client ID y Client Secret
-   - Autorizar con cuenta de Google
+#### Slack
+
+1. **Credentials** → **Add Credential** → **Slack OAuth2 API**
+2. Ingresar Bot Token
+3. Click en **Connect** para autorizar
+
+#### Gmail
+
+1. **Credentials** → **Add Credential** → **Gmail OAuth2 API**
+2. Ingresar Client ID y Client Secret
+3. Click en **Connect** para autorizar con cuenta de Google
 
 ---
 
@@ -222,21 +313,38 @@ docker compose up -d
 
 ### Importar Workflow
 
+```
 1. Acceder a n8n Editor
-2. **Menu (⋮) → Import → From File**
-3. Seleccionar `flujo_1_platzi.json`
-4. Verificar que las credenciales estén vinculadas correctamente
+2. Menu (⋮) → Import → From File
+3. Seleccionar: workflows/flujo1/flujo_1_platzi.json
+4. Verificar credenciales vinculadas
+```
 
 ### Activar Workflow
 
-1. Toggle **Active** en la esquina superior derecha
-2. Copiar la URL del Form Trigger para pruebas
-3. Verificar logs en **Executions**
+| Paso | Acción |
+|------|--------|
+| 1 | Toggle **Active** (esquina superior derecha) |
+| 2 | Copiar URL del Form Trigger |
+| 3 | Verificar en **Executions** |
 
 ### URL del Formulario
 
 ```
-https://<TU_NGROK>/form/<WEBHOOK_ID>
+https://<TU_NGROK_DOMAIN>/form/<WEBHOOK_ID>
+```
+
+### Probar Workflow
+
+```bash
+# Ejemplo con curl
+curl -X POST https://<TU_NGROK_DOMAIN>/form/<WEBHOOK_ID> \
+  -H "Content-Type: application/json" \
+  -d '{
+    "Nombre": "Test User",
+    "Email": "test@example.com",
+    "Mensaje": "Quiero una demo del producto"
+  }'
 ```
 
 ---
@@ -253,21 +361,26 @@ n8n-workflows-course-platzi/
 ├── README.md
 └── workflows/
     └── flujo1/
+        ├── assets/
+        │   └── flujo_1_v1.0.0.png
         ├── flujo_1_platzi.json
         └── flujo_1.md
 ```
 
 ### Exportar Workflow
 
-1. En n8n Editor: **Menu (⋮) → Export → Download**
+1. En n8n Editor: **Menu (⋮)** → **Export** → **Download**
 2. Guardar como `.json` en directorio correspondiente
+3. Nombrar con versión: `flujo_1_platzi_v1.1.0.json` (opcional)
 
 ### Configuración de .gitignore
 
 ```gitignore
+# filepath: .gitignore
 # Secrets
 .env
 *.env.local
+*.env.*.local
 
 # n8n Data
 n8n_data/
@@ -275,27 +388,26 @@ n8n_data/
 # OS Files
 .DS_Store
 Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
 ```
 
-### Git Workflow
+### Conventional Commits
 
 ```bash
-# Inicializar repositorio
-git init
-git branch -M main
-git remote add origin git@github.com:<USUARIO>/n8n-workflows-course-platzi.git
+# Feature
+git commit -m "feat(flujo1): add email validation before routing"
 
-# Commit con Conventional Commits
-git add .
-git commit -m "feat(workflow): add lead capture and routing automation
+# Fix
+git commit -m "fix(flujo1): correct Slack channel ID reference"
 
-- Add form trigger for lead capture
-- Implement domain filtering (@platzi.com exclusion)
-- Add conditional routing to Slack/Gmail
-- Include Docker infrastructure setup"
-
-# Push
-git push -u origin main
+# Docs
+git commit -m "docs(flujo1): update architecture diagram for v1.1.0"
 ```
 
 ---
@@ -304,50 +416,58 @@ git push -u origin main
 
 ### Problemas Comunes
 
-| Síntoma | Causa Probable | Solución |
-|---------|----------------|----------|
-| Webhook no responde | ngrok desconectado | Reiniciar túnel y actualizar `.env` |
-| Error OAuth2 Slack | Redirect URI incorrecta | Verificar URL en Slack App Settings |
-| Error OAuth2 Gmail | Consent Screen incompleto | Agregar email a Test Users |
-| Form no carga | Workflow inactivo | Activar toggle en n8n Editor |
-| Mensaje no llega a Slack | Canal incorrecto | Verificar `channelId` en nodo Slack |
+| Problema | Causa | Solución |
+|----------|-------|----------|
+| Webhook no responde | Túnel ngrok caído | Reiniciar ngrok y actualizar `N8N_HOST` |
+| OAuth error en Slack | Redirect URI incorrecta | Verificar URL en Slack App config |
+| Gmail 403 Forbidden | App no verificada | Agregar email a Test Users en GCP |
+| Formulario no aparece | Workflow inactivo | Activar toggle en n8n Editor |
+| Credenciales expiradas | Token OAuth vencido | Re-autorizar en n8n Credentials |
 
-### Logs y Debugging
+### Comandos de Debugging
 
 ```bash
-# Ver logs del contenedor
-docker compose logs -f n8n
+# Ver logs de n8n
+docker logs n8n --tail 100 -f
 
-# Verificar estado del servicio
-docker compose ps
+# Verificar conectividad ngrok
+curl -I https://<TU_NGROK_DOMAIN>/healthz
 
-# Reiniciar servicio
+# Reiniciar servicios
 docker compose restart n8n
+
+# Verificar estado del contenedor
+docker inspect n8n --format='{{.State.Status}}'
 ```
 
-### Validar Conectividad
+### Validar Credenciales
 
 ```bash
-# Test ngrok tunnel
-curl -I https://<TU_NGROK>/healthz
+# Test Slack API
+curl -X POST https://slack.com/api/auth.test \
+  -H "Authorization: Bearer <BOT_TOKEN>"
 
-# Test n8n interno
-curl -I http://localhost:5678/healthz
+# Test Gmail API (requiere OAuth token activo)
+curl https://gmail.googleapis.com/gmail/v1/users/me/profile \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
 
 ---
 
 ## Referencias
 
-- [Documentación oficial n8n](https://docs.n8n.io/)
-- [Slack API Documentation](https://api.slack.com/docs)
-- [Gmail API Reference](https://developers.google.com/gmail/api/reference/rest)
-- [ngrok Documentation](https://ngrok.com/docs)
+| Recurso | Enlace |
+|---------|--------|
+| Documentación n8n | [docs.n8n.io](https://docs.n8n.io/) |
+| n8n Form Trigger | [docs.n8n.io/nodes/n8n-nodes-base.formTrigger](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.formtrigger/) |
+| Slack API | [api.slack.com](https://api.slack.com/) |
+| Gmail API | [developers.google.com/gmail/api](https://developers.google.com/gmail/api) |
+| ngrok Docs | [ngrok.com/docs](https://ngrok.com/docs) |
+| Conventional Commits | [conventionalcommits.org](https://www.conventionalcommits.org/) |
 
 ---
 
-<div align="center">
-
-**Archivo de workflow:** [`flujo_1_platzi.json`](./flujo_1_platzi.json)
-
-</div>
+<p align="center">
+  <strong>Curso n8n - Platzi</strong><br/>
+  <em>Automatización de flujos de trabajo</em>
+</p>
