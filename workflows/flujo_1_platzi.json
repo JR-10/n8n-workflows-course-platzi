@@ -1,0 +1,262 @@
+{
+  "name": "flujo_1_platzi",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0f59f3e2-471a-48ba-9609-2e2e9a6caec6",
+              "name": "nombre",
+              "value": "={{ $json.Nombre }}",
+              "type": "string"
+            },
+            {
+              "id": "ce9c15bc-cf4f-4674-b577-0913f174c809",
+              "name": "email",
+              "value": "={{ $json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "68f6bff1-4a59-43f6-a5d0-2d07a4e1fbeb",
+              "name": "mensaje",
+              "value": "={{ $json.Mensaje }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4f2e0b6d-bd32-4d8d-9b80-4641e3af9d25",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1878b9ea-5c10-4ef6-9ffd-e9e1e9639a31",
+              "leftValue": "={{ $json.mensaje }}",
+              "rightValue": "demo",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        656,
+        0
+      ],
+      "id": "dfdf9051-f445-4f2f-b3e0-7630b903d460",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0ACYQ61KL0",
+          "mode": "list",
+          "cachedResultName": "sellers"
+        },
+        "text": "={{ $json.mensaje }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        880,
+        -96
+      ],
+      "id": "2441a256-0e3b-4929-9f54-46259da5a5c7",
+      "name": "Send a message",
+      "webhookId": "393fb98b-a8af-4f65-b6c7-7cea5a96dba7",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "wrFRKTbn2g4NXrFA",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "Gracias",
+        "message": "Gracias por su interes",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        96
+      ],
+      "id": "028fa9df-748c-4ed8-8493-d1fe78187252",
+      "name": "Send a message1",
+      "webhookId": "821b52d5-3428-440a-9ec2-d76c5b8ffa2d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "NoBpESmxZ8vJ1Xul",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Lead",
+        "formDescription": "Quiero comprar tu producto",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Nombre",
+              "placeholder": "Nombre",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "Email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Mensaje",
+              "fieldType": "textarea",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -16,
+        0
+      ],
+      "id": "703b878e-67c9-4f2d-a4d6-563211a43edf",
+      "name": "On form submission",
+      "webhookId": "9fade18a-8b24-4888-8004-851bf5ae4eaf"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9c79faae-f9d8-4b0f-98f5-bef483ab60d9",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "@platzi.com",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        432,
+        0
+      ],
+      "id": "512b1295-4cb0-45e5-b271-a5317c1301e7",
+      "name": "Filter"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "f3fc33cd-9feb-4552-b3d3-484bca56b3ed",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "372435babef21e216343720317df769884862227222f49fcb79c364841b8df0f"
+  },
+  "id": "u3hrjK8OOdH3YuKt9iIoq",
+  "tags": []
+}

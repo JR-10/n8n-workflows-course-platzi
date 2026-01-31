@@ -1,0 +1,42 @@
+version: "3.8"  # Versión del formato de docker-compose
+
+services:
+  n8n:
+    image: n8nio/n8n:latest          # Imagen oficial de n8n, siempre la última versión estable
+    container_name: n8n               # Nombre del contenedor
+    restart: unless-stopped            # Reinicia automáticamente si se cae
+    ports:
+      - "5678:5678"                   # Puerto local para acceder a n8n desde el navegador
+    environment:
+      # -------------------------- Zona horaria ---------------------------------
+      - TZ=America/Bogota             # Ajusta la zona horaria del contenedor
+
+      # -------------------------- Modo de ejecución ----------------------------
+      - NODE_ENV=production           # Optimiza n8n para producción (mejora rendimiento y logs)
+
+      # -------------------------- Autenticación básica ------------------------
+      # Durante la conexión OAuth de Slack, dejarla false para evitar 401 Unauthorized
+      - N8N_BASIC_AUTH_ACTIVE=false    # Activa autenticación básica para seguridad mínima
+      - N8N_BASIC_AUTH_USER=admin     # Usuario de acceso
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}  # Contraseña segura desde .env
+
+      # -------------------------- Configuración host y HTTPS -----------------
+      - N8N_HOST=${N8N_HOST}          # Host público de n8n (ngrok o dominio propio)
+      - N8N_PROTOCOL=https             # Protocolo usado (HTTPS requerido por Slack)
+      - N8N_PORT=5678                  # Puerto interno del contenedor
+      - WEBHOOK_URL=https://${N8N_HOST} # URL pública para webhooks (Slack, Stripe, etc.)
+
+      # -------------------------- Logs y debug --------------------------------
+      - N8N_LOG_LEVEL=info             # Nivel de logs, info suficiente para desarrollo/producción
+
+      # -------------------------- Opciones recomendadas ----------------------
+      - N8N_NODE_DEFAULT_WORKFLOW_ACTIVE=true   # Habilita que nuevos workflows activos se ejecuten automáticamente
+      - N8N_EDITOR_BASE_URL=https://${N8N_HOST}  # Para que la interfaz use la URL pública (ngrok o dominio)
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY} # Clave para encriptar credenciales (obligatorio en producción)
+
+    volumes:
+      - n8n_data:/home/node/.n8n       # Persistencia de workflows, credenciales y DB SQLite
+
+# ---------------------------- Volúmenes persistentes ------------------------
+volumes:
+  n8n_data:                           # Almacena datos de n8n aunque el contenedor se reinicie

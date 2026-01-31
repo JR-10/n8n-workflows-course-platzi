@@ -1,0 +1,6 @@
+# .gitignore
+.env
+.n8n/
+n8n_data/
+node_modules/
+.DS_Store
