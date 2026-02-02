@@ -54,7 +54,7 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.4,
       "position": [
-        1232,
+        1296,
         -96
       ],
       "id": "2441a256-0e3b-4929-9f54-46259da5a5c7",
@@ -188,7 +188,7 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1232,
+        1296,
         96
       ],
       "id": "028fa9df-748c-4ed8-8493-d1fe78187252",
@@ -300,8 +300,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1232,
-        288
+        1584,
+        296
       ],
       "id": "c600d671-9959-4960-9734-d42ec80205b4",
       "name": "Send a message2",
@@ -310,6 +310,74 @@
         "gmailOAuth2": {
           "id": "NoBpESmxZ8vJ1Xul",
           "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $('Edit Fields').item.json.mensaje }}",
+        "options": {
+          "categories": "Positive, Negative",
+          "enableAutoFixing": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.sentimentAnalysis",
+      "typeVersion": 1.1,
+      "position": [
+        1232,
+        392
+      ],
+      "id": "2ab76f1a-e3c7-4274-a496-8148547aee29",
+      "name": "Sentiment Analysis"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1304,
+        616
+      ],
+      "id": "40ac377d-cb08-4474-9951-a74069ba4e5b",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "3yt3GqTFoZpTP7JA",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0ACERH2N77",
+          "mode": "list",
+          "cachedResultName": "support"
+        },
+        "text": "=Por favor, equipo un cliente tiene problemas y esta enfadado:\n  - Email: {{ $('Edit Fields').item.json.email }}\n  - Nombre: {{ $('Edit Fields').item.json.nombre }}\n  - Mensaje: {{ $('Edit Fields').item.json.mensaje }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1584,
+        488
+      ],
+      "id": "a8c6052b-bd42-40e4-a1eb-26acc5292ed7",
+      "name": "Send a message3",
+      "webhookId": "393fb98b-a8af-4f65-b6c7-7cea5a96dba7",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "wrFRKTbn2g4NXrFA",
+          "name": "Slack account"
         }
       }
     }
@@ -404,8 +472,37 @@
         ],
         [
           {
+            "node": "Sentiment Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sentiment Analysis": {
+      "main": [
+        [
+          {
             "node": "Send a message2",
             "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sentiment Analysis",
+            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -417,7 +514,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "cced3c11-14ec-4140-b79f-3f05e13ddef2",
+  "versionId": "26c06893-627b-42a1-8b08-59047c41d940",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "372435babef21e216343720317df769884862227222f49fcb79c364841b8df0f"
