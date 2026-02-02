@@ -38,39 +38,6 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "1878b9ea-5c10-4ef6-9ffd-e9e1e9639a31",
-              "leftValue": "={{ $json.mensaje }}",
-              "rightValue": "demo",
-              "operator": {
-                "type": "string",
-                "operation": "contains"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        656,
-        0
-      ],
-      "id": "dfdf9051-f445-4f2f-b3e0-7630b903d460",
-      "name": "If"
-    },
-    {
-      "parameters": {
         "authentication": "oAuth2",
         "select": "channel",
         "channelId": {
@@ -79,7 +46,7 @@
           "mode": "list",
           "cachedResultName": "sellers"
         },
-        "text": "={{ $json.mensaje }}",
+        "text": "={{ $('Edit Fields').item.json.mensaje }}",
         "otherOptions": {
           "includeLinkToWorkflow": false
         }
@@ -87,7 +54,7 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.4,
       "position": [
-        880,
+        1232,
         -96
       ],
       "id": "2441a256-0e3b-4929-9f54-46259da5a5c7",
@@ -97,29 +64,6 @@
         "slackOAuth2Api": {
           "id": "wrFRKTbn2g4NXrFA",
           "name": "Slack account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "sendTo": "={{ $json.email }}",
-        "subject": "Gracias",
-        "message": "Gracias por su interes",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        880,
-        96
-      ],
-      "id": "028fa9df-748c-4ed8-8493-d1fe78187252",
-      "name": "Send a message1",
-      "webhookId": "821b52d5-3428-440a-9ec2-d76c5b8ffa2d",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "NoBpESmxZ8vJ1Xul",
-          "name": "Gmail account"
         }
       }
     },
@@ -191,6 +135,160 @@
       ],
       "id": "512b1295-4cb0-45e5-b271-a5317c1301e7",
       "name": "Filter"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.mensaje }}",
+        "options": {
+          "systemMessage": "Cataloga este mensaje en una de estas opciones: info, demo y soporte.\n\nLa respuesta tiene que ser una categoría en minúscula."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        656,
+        0
+      ],
+      "id": "8608da97-1a21-47ae-b76d-7ad1cacfc343",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        728,
+        224
+      ],
+      "id": "8a7c8fe6-d8f9-420c-be8f-995eddda74ad",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "INKzq2EKBelK36ea",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields').item.json.email }}",
+        "subject": "Gracias",
+        "message": "Gracias por su interes",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1232,
+        96
+      ],
+      "id": "028fa9df-748c-4ed8-8493-d1fe78187252",
+      "name": "Send a message1",
+      "webhookId": "821b52d5-3428-440a-9ec2-d76c5b8ffa2d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "NoBpESmxZ8vJ1Xul",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "demo",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "616a32b2-0440-45c0-b9a8-c690013927be"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Demo"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "96e9aa9a-74ed-4389-911c-dd56a805082f",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "info",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Info"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "5be16a0e-900f-4520-8f1d-3d86b74e1048",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "soporte",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Soporte"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1008,
+        -16
+      ],
+      "id": "67308ac3-ac4b-48a8-b1b4-c7367cbeccd0",
+      "name": "Switch"
     }
   ],
   "pinData": {},
@@ -200,24 +298,6 @@
         [
           {
             "node": "Filter",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "If": {
-      "main": [
-        [
-          {
-            "node": "Send a message",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Send a message1",
             "type": "main",
             "index": 0
           }
@@ -239,7 +319,54 @@
       "main": [
         [
           {
-            "node": "If",
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
             "type": "main",
             "index": 0
           }
@@ -252,7 +379,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "f3fc33cd-9feb-4552-b3d3-484bca56b3ed",
+  "versionId": "04ed6aa2-cae4-4be1-a637-3c7fae033944",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "372435babef21e216343720317df769884862227222f49fcb79c364841b8df0f"
