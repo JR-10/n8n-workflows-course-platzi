@@ -31,7 +31,7 @@
       "typeVersion": 3.4,
       "position": [
         208,
-        0
+        96
       ],
       "id": "4f2e0b6d-bd32-4d8d-9b80-4641e3af9d25",
       "name": "Edit Fields"
@@ -46,7 +46,7 @@
           "mode": "list",
           "cachedResultName": "sellers"
         },
-        "text": "={{ $('Edit Fields').item.json.mensaje }}",
+        "text": "=Equipo, buenas noticias, tenemos un nuevo lead:\n  - Email: {{ $('Edit Fields').item.json.email }}\n  - Nombre: {{ $('Edit Fields').item.json.nombre }}\n  - Mensaje: {{ $('Edit Fields').item.json.mensaje }}",
         "otherOptions": {
           "includeLinkToWorkflow": false
         }
@@ -97,7 +97,7 @@
       "typeVersion": 2.5,
       "position": [
         -16,
-        0
+        96
       ],
       "id": "703b878e-67c9-4f2d-a4d6-563211a43edf",
       "name": "On form submission",
@@ -131,7 +131,7 @@
       "typeVersion": 2.3,
       "position": [
         432,
-        0
+        96
       ],
       "id": "512b1295-4cb0-45e5-b271-a5317c1301e7",
       "name": "Filter"
@@ -148,7 +148,7 @@
       "typeVersion": 3.1,
       "position": [
         656,
-        0
+        96
       ],
       "id": "8608da97-1a21-47ae-b76d-7ad1cacfc343",
       "name": "AI Agent"
@@ -167,7 +167,7 @@
       "typeVersion": 1.3,
       "position": [
         728,
-        224
+        320
       ],
       "id": "8a7c8fe6-d8f9-420c-be8f-995eddda74ad",
       "name": "OpenAI Chat Model",
@@ -181,8 +181,8 @@
     {
       "parameters": {
         "sendTo": "={{ $('Edit Fields').item.json.email }}",
-        "subject": "Gracias",
-        "message": "Gracias por su interes",
+        "subject": "Aquí tiene la información necesaria",
+        "message": "=Hola {{ $('Edit Fields').item.json.nombre }},\npor favor verifique este enlace para obtener mas información.\nhttps://n8n.io",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",
@@ -285,13 +285,51 @@
       "typeVersion": 3.4,
       "position": [
         1008,
-        -16
+        80
       ],
       "id": "67308ac3-ac4b-48a8-b1b4-c7367cbeccd0",
       "name": "Switch"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields').item.json.email }}",
+        "subject": "Le atenderemos lo antes posible",
+        "message": "=Hola {{ $('Edit Fields').item.json.nombre }},\nsentimos mucho que haya tenido problemas, hemos entendido que tiene el siguiente problema:\n\"{{ $('Edit Fields').item.json.mensaje }}\"",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1232,
+        288
+      ],
+      "id": "c600d671-9959-4960-9734-d42ec80205b4",
+      "name": "Send a message2",
+      "webhookId": "821b52d5-3428-440a-9ec2-d76c5b8ffa2d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "NoBpESmxZ8vJ1Xul",
+          "name": "Gmail account"
+        }
+      }
     }
   ],
-  "pinData": {},
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          "Nombre": "Jonathan",
+          "Email": "arbeyjr@gmail.com",
+          "Mensaje": "Su plataforma falla demasiado necesito ayuda!",
+          "submittedAt": "2026-02-02T15:37:34.019-05:00",
+          "formMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
   "connections": {
     "Edit Fields": {
       "main": [
@@ -366,7 +404,7 @@
         ],
         [
           {
-            "node": "Send a message1",
+            "node": "Send a message2",
             "type": "main",
             "index": 0
           }
@@ -379,7 +417,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "04ed6aa2-cae4-4be1-a637-3c7fae033944",
+  "versionId": "cced3c11-14ec-4140-b79f-3f05e13ddef2",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "372435babef21e216343720317df769884862227222f49fcb79c364841b8df0f"
